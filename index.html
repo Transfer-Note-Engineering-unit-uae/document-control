@@ -2,24 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#1f2a3c">
 <title>EU Document Control</title>
 <style>
-html,body{margin:0;height:100%;background:#f3f5f8;font-family:system-ui,sans-serif}
-iframe{position:fixed;inset:0;width:100%;height:100%;border:0}
-#ld{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#6b7585;font-size:14px}
+html,body{margin:0;height:100%;background:#1f2a3c;font-family:system-ui,sans-serif}
+#ld{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#c9d4e3;font-size:14px;text-align:center;padding:16px}
 #ld b{width:46px;height:46px;border-radius:11px;background:#1c74e9;color:#fff;display:grid;place-items:center;font-weight:900}
+#ld button{margin-top:6px;border:0;border-radius:5px;background:#1c74e9;color:#fff;font:700 14px system-ui;padding:9px 16px}
 </style>
 </head>
 <body>
-<div id="ld"><b>EU</b>Loading EU Document Control...</div>
-<iframe id="app" title="EU Document Control" allow="clipboard-write"></iframe>
+<div id="ld"><b>EU</b><span id="lm">Loading EU Document Control...</span></div>
 <script>
 var EXEC = "https://script.google.com/macros/s/AKfycbyJciSE-nAooubp-hOYyXYTMQg0RclnWEjuTKyjHjLFz-8toDd2S8e65NzKE5jlTZy4/exec";
-var f = document.getElementById("app");
-f.addEventListener("load", function(){ document.getElementById("ld").style.display = "none"; });
-f.src = EXEC + (location.search || "");
+var SHIM = '<script>(function(){var X="' + EXEC + '";'
+ + 'function mk(s,f){return new Proxy({},{get:function(_,k){'
+ + 'if(k==="withSuccessHandler")return function(h){return mk(h,f);};'
+ + 'if(k==="withFailureHandler")return function(h){return mk(s,h);};'
+ + 'return function(){var a=[].slice.call(arguments);'
+ + 'fetch(X,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn:k,args:a})})'
+ + '.then(function(r){return r.json();})'
+ + '.then(function(j){if(j.ok){if(s)s(j.result);}else if(f){f(new Error(j.error||"Server error."));}},'
+ + 'function(){if(f)f(new Error("Network error. Check internet and try again."));});};}});}'
+ + 'window.google={script:{run:mk(null,null)}};})();<\/script>';
+function fail(){
+ document.getElementById("lm").textContent = "Could not load. Check internet and try again.";
+ var b = document.createElement("button"); b.textContent = "Try again"; b.onclick = function(){ location.reload(); };
+ document.getElementById("ld").appendChild(b);
+}
+var q = new URLSearchParams(location.search), u = EXEC + "?api=html";
+if(q.get("r")) u += "&r=" + encodeURIComponent(q.get("r")) + "&t=" + encodeURIComponent(q.get("t") || "");
+fetch(u).then(function(r){ return r.json(); }).then(function(j){
+ if(!j || !j.html) return fail();
+ var h = j.html.replace("<head>", "<head>" + SHIM);
+ document.open(); document.write(h); document.close();
+}, fail);
 </script>
 </body>
 </html>
